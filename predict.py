@@ -1,18 +1,18 @@
 from typing import List, Optional
 from cog import BasePredictor, Input
-from transformers import T5ForConditionalGeneration, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 
 CACHE_DIR = 'weights'
 
 # Shorthand identifier for a transformers model.
 # See https://huggingface.co/models?library=transformers for a list of models.
-MODEL_NAME = 'google/flan-t5-xl'
+MODEL_NAME = 'PygmalionAI/pygmalion-6b'
 
 class Predictor(BasePredictor):
     def setup(self):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME, cache_dir=CACHE_DIR, local_files_only=True)
+        self.model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, cache_dir=CACHE_DIR, local_files_only=True, low_cpu_mem_usage=True, torch_dtype=torch.float16)
         self.model.to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir=CACHE_DIR, local_files_only=True)
 
@@ -42,7 +42,19 @@ class Predictor(BasePredictor):
             ge=0.01,
             le=5,
             default=1
-        )
+        ),
+        typical_p: float= Input(
+            description="When decoding text, samples from the top p percentage of most likely tokens; lower to ignore less likely tokens",
+            ge=0.01,
+            le=1.0,
+            default=1.0
+        ),
+        top_k: float= Input(
+            description="When decoding text, samples from the top p percentage of most likely tokens; lower to ignore less likely tokens",
+            ge=0.01,
+            le=1.0,
+            default=1.0
+        ),
         ) -> List[str]:
         input = self.tokenizer(prompt, return_tensors="pt").input_ids.to(self.device)
 
@@ -53,7 +65,15 @@ class Predictor(BasePredictor):
             do_sample=True,
             temperature=temperature,
             top_p=top_p,
-            repetition_penalty=repetition_penalty
+            typical_p=typical_p,
+            repetition_penalty=repetition_penalty,
+            encoder_repetition_penalty= 1,
+            top_k=top_k,
+            num_beams=1,
+            penalty_alpha=0,
+            min_length=0,
+            length_penalty=1,
+            no_repeat_ngram_size=0,
         )
         out = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
         return out
