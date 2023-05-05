@@ -49,11 +49,11 @@ class Predictor(BasePredictor):
             le=1.0,
             default=1.0
         ),
-        top_k: float= Input(
+        top_k: int= Input(
             description="When decoding text, samples from the top p percentage of most likely tokens; lower to ignore less likely tokens",
-            ge=0.01,
-            le=1.0,
-            default=1.0
+            ge=1,
+            le=100,
+            default=50
         ),
         ) -> List[str]:
         input = self.tokenizer(prompt, return_tensors="pt").input_ids.to(self.device)
