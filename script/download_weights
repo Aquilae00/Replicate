@@ -1,4 +1,3 @@
-git clone https://huggingface.co/waifu-workshop/pygmalion-6b --branch sharded pygmalion-6b_sharded
 #!/usr/bin/env python
 
 import os
@@ -6,6 +5,9 @@ from pathlib import Path
 import shutil
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
+import subprocess
+process = subprocess.Popen(["git", "clone", "https://huggingface.co/waifu-workshop/pygmalion-6b","--branch","sharded","pygmalion-6b_sharded"], stdout=subprocess.PIPE)
+output = process.communicate()[0]
 CACHE_DIR = 'weights'
 
 if os.path.exists(CACHE_DIR):
