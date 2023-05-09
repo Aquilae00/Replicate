@@ -6,5 +6,6 @@ build:
     - "transformers==4.26.1"
     - "sentencepiece==0.1.97"
     - "accelerate==0.16.0"
+    - "safetensors==0.3.0"
 
 predict: "predict.py:Predictor"
