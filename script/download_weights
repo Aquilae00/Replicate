@@ -1,15 +1,18 @@
+git clone https://huggingface.co/waifu-workshop/pygmalion-6b --branch sharded pygmalion-6b_sharded
 #!/usr/bin/env python
 
 import os
+from pathlib import Path
 import shutil
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
+import torch
 CACHE_DIR = 'weights'
 
 if os.path.exists(CACHE_DIR):
     shutil.rmtree(CACHE_DIR)
 
 os.makedirs(CACHE_DIR)
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-model = AutoModelForCausalLM.from_pretrained("PygmalionAI/pygmalion-6b", cache_dir=CACHE_DIR)
-tokenizer = AutoTokenizer.from_pretrained("PygmalionAI/pygmalion-6b", cache_dir=CACHE_DIR)
+model = AutoModelForCausalLM.from_pretrained(Path("pygmalion-6b_sharded"), low_cpu_mem_usage=True, torch_dtype=torch.float16).cuda()
+tokenizer = AutoTokenizer.from_pretrained(Path("pygmalion-6b_sharded"))
