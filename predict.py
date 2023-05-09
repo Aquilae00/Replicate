@@ -1,6 +1,7 @@
 from typing import List, Optional
 from cog import BasePredictor, Input
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from pathlib import Path
 import torch
 
 CACHE_DIR = 'weights'
@@ -12,9 +13,9 @@ MODEL_NAME = 'PygmalionAI/pygmalion-6b'
 class Predictor(BasePredictor):
     def setup(self):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, cache_dir=CACHE_DIR, local_files_only=True, low_cpu_mem_usage=True, torch_dtype=torch.float16)
+        self.model = AutoModelForCausalLM.from_pretrained(Path("pygmalion-6b_sharded"), cache_dir=CACHE_DIR, local_files_only=True, low_cpu_mem_usage=True, torch_dtype=torch.float16)
         self.model.to(self.device)
-        self.tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir=CACHE_DIR, local_files_only=True)
+        self.tokenizer = AutoTokenizer.from_pretrained(Path("pygmalion-6b_sharded"), cache_dir=CACHE_DIR, local_files_only=True)
 
     def predict(
         self,
